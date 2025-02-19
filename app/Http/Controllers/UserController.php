@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -13,7 +14,8 @@ class UserController extends Controller
     public function index()
     {
         // Fetch all users
-        $users = User::all();
+        // $users = User::all();
+        $users = User::with('phone')->get();
         // dd($users); // to check the data
         return view('user.index', compact('users')); // Change 'crud.index' to 'user.index'
     }
@@ -29,23 +31,30 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-   public function store(Request $request)
+  public function store(Request $request)
     {
-        // Validation rules
+        // Validate the request
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email|max:255',
-            'password' => 'required|string|min:8|confirmed', // Ensuring password is confirmed
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|confirmed|min:8',
+            'phone_number' => 'required|string|max:10', // Validation for phone number
         ]);
 
-        // Create the new user
-        User::create([
+        // Create a new user
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password), // Hash the password
+            'password' => Hash::make($request->password), // Hash the password
         ]);
 
-        return redirect()->route('user.index'); // Change 'crud.index' to 'user.index'
+        // Create the associated phone for the user
+        $user->phone()->create([
+            'number' => $request->phone_number, // The phone number from the form
+        ]);
+
+        // Redirect back or to the users list page
+        return redirect()->route('user.index')->with('success', 'User created successfully.');
     }
 
 

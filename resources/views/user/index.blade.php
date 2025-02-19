@@ -9,6 +9,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Phone Number</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -17,6 +18,7 @@
                     <tr>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
+                        <td>{{ $user->phone ? $user->phone->number : 'No phone number' }}</td>
                         <td>
                             <a href="{{ route('user.edit', $user->id) }}">Edit</a>
                             <!-- Add a delete button here if needed -->
